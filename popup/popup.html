@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OmniVideo · 视频下载助手</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <!-- 顶栏 -->
+  <header class="app-header">
+    <div class="brand">
+      <span class="logo-icon">⚡</span>
+      <span class="brand-name">OmniVideo</span>
+      <span class="brand-sub">· 下载助手</span>
+    </div>
+    <div class="server-status on" id="serverStatus" title="本地纯前端引擎已就绪">
+      <span class="status-dot"></span>
+      <span class="status-text" id="statusText">独立引擎 · 就绪</span>
+    </div>
+  </header>
+
+  <!-- 导航 Tab -->
+  <nav class="tabs-nav">
+    <button class="tab-btn active" data-tab="tab-download">
+      <span class="tab-icon">⚡</span>
+      <span>快捷下载</span>
+    </button>
+    <button class="tab-btn" data-tab="tab-tasks">
+      <span class="tab-icon">📋</span>
+      <span>任务管理</span>
+      <span class="tab-badge" id="tasksActiveBadge" hidden>0</span>
+    </button>
+    <button class="tab-btn" data-tab="tab-settings">
+      <span class="tab-icon">⚙️</span>
+      <span>引擎设置</span>
+    </button>
+  </nav>
+
+  <!-- 主体内容区域 -->
+  <main class="app-main">
+
+    <!-- ================= Tab 1: 快捷与嗅探下载 ================= -->
+    <section class="tab-pane active" id="tab-download">
+      
+      <!-- 指定链接下载卡片 -->
+      <div class="card card-action">
+        <div class="card-title-row">
+          <span class="card-title">指定链接下载</span>
+          <div class="quick-helpers">
+            <button class="text-btn" id="btnPasteClipboard" title="从剪贴板自动粘贴链接">📋 粘贴剪贴板</button>
+            <button class="text-btn" id="btnUseCurrentPage" title="填入当前标签页地址">🌐 当前页</button>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <input 
+            type="text" 
+            id="inputCustomUrl" 
+            placeholder="粘贴任意视频链接 (B站/油管/抖音/Eporner/直链...)" 
+            spellcheck="false" 
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="quality-selector">
+          <span class="q-label">画质选项:</span>
+          <div class="q-chips">
+            <button class="q-chip active" data-quality="best">🔥 最高画质 (Best)</button>
+            <button class="q-chip" data-quality="compat">⚡ 兼容格式 (H.264)</button>
+            <button class="q-chip" data-quality="audio">🎵 纯音频 (MP3)</button>
+          </div>
+        </div>
+
+        <div class="action-btn-row">
+          <button class="btn btn-primary btn-block" id="btnSubmitCustomUrl">
+            <span>🚀 立即下载指定视频</span>
+          </button>
+        </div>
+        <div class="action-feedback" id="customUrlFeedback"></div>
+      </div>
+
+      <!-- 本页视频嗅探列表卡片 -->
+      <div class="card card-sniff">
+        <div class="card-title-row">
+          <div class="sniff-title-group">
+            <span class="card-title">本页发现的视频</span>
+            <span class="sniff-count" id="sniffCountBadge">0</span>
+          </div>
+          <div class="sniff-batch-actions">
+            <label class="select-all-label">
+              <input type="checkbox" id="chkSelectAll" /> 全选
+            </label>
+            <button class="btn btn-sm btn-outline" id="btnBatchDownload" disabled>批量下载已选</button>
+            <button class="btn btn-sm btn-icon" id="btnRefreshSniff" title="重新扫描当前页">🔄</button>
+          </div>
+        </div>
+
+        <!-- 嗅探列表展示 -->
+        <div class="sniff-container" id="sniffListContainer">
+          <div class="empty-hint" id="sniffEmptyHint">
+            <span>🔍 正在探测当前页面视频…</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= Tab 2: 任务管理 ================= -->
+    <section class="tab-pane" id="tab-tasks">
+      <div class="tasks-toolbar">
+        <div class="toolbar-info">
+          <span>任务列表 (<b id="tasksTotalCount">0</b>)</span>
+        </div>
+        <div class="toolbar-actions">
+          <button class="btn btn-sm btn-outline" id="btnClearDoneTasks">🗑️ 清理已完成</button>
+          <button class="btn btn-sm btn-icon" id="btnRefreshTasks" title="刷新任务进度">🔄</button>
+        </div>
+      </div>
+
+      <div class="tasks-scroll-wrap" id="tasksListContainer">
+        <div class="empty-hint">暂无下载任务</div>
+      </div>
+
+      <div class="pager-row" id="tasksPager" hidden>
+        <button class="btn btn-sm btn-outline" id="btnPagePrev">上一页</button>
+        <span class="pager-text" id="pagerInfo">1 / 1</span>
+        <button class="btn btn-sm btn-outline" id="btnPageNext">下一页</button>
+      </div>
+    </section>
+
+    <!-- ================= Tab 3: 本地引擎设置 ================= -->
+    <section class="tab-pane" id="tab-settings">
+      <!-- 引擎架构说明 -->
+      <div class="card">
+        <div class="card-title-row">
+          <span class="card-title">独立引擎架构</span>
+          <span class="task-pill done">纯前端运行中</span>
+        </div>
+        <p class="card-desc">当前运行于浏览器独立沙箱环境，直接在前端解析 HLS/M3U8 播放列表、AES-128 解密与 mux.js 混流转码，100% 本地纯前端运行，无需开启外部服务。</p>
+      </div>
+
+      <!-- 网页悬浮交互控件设置 -->
+      <div class="card">
+        <div class="card-title">网页悬浮胶囊显示设置</div>
+        <p class="card-desc">自定义在网页中显示的悬浮下载控件与侧边徽标，修改后即刻生效，无需刷新网页。</p>
+
+        <div class="setting-item">
+          <div class="setting-label">
+            <span class="setting-name">显示右侧嗅探浮标 (⚡ OmniVideo)</span>
+            <span class="setting-hint">吸附在网页右侧边缘的视频嗅探计数徽标，点击展开下载面板</span>
+          </div>
+          <div class="setting-control">
+            <label class="switch">
+              <input type="checkbox" id="chkShowSideCapsule" checked />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-label">
+            <span class="setting-name">显示视频卡片快捷胶囊 (⚡ 下载 / MP3)</span>
+            <span class="setting-hint">鼠标悬停在首页推荐、列表封面卡片右上角时的微型胶囊</span>
+          </div>
+          <div class="setting-control">
+            <label class="switch">
+              <input type="checkbox" id="chkShowCardCapsule" checked />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-label">
+            <span class="setting-name">显示视频播放器超级胶囊</span>
+            <span class="setting-hint">主视频播放器内部悬浮的一键下载、截图、画中画全能胶囊</span>
+          </div>
+          <div class="setting-control">
+            <label class="switch">
+              <input type="checkbox" id="chkShowPlayerCapsule" checked />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 下载配置 -->
+      <div class="card">
+        <div class="card-title">下载并发与线程配置</div>
+        
+        <div class="setting-item">
+          <div class="setting-label">
+            <span class="setting-name">分片并发下载线程数</span>
+            <span class="setting-hint">切片并发拉取线程数，建议 3~8 线程</span>
+          </div>
+          <div class="setting-control">
+            <select id="selectConcurrency" class="setting-select">
+              <option value="2">2 线程 (省内存)</option>
+              <option value="3">3 线程</option>
+              <option value="5" selected>5 线程 (推荐均衡)</option>
+              <option value="8">8 线程 (极速并发)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-label">
+            <span class="setting-name">极速下载模式</span>
+            <span class="setting-hint">实时管道流直达浏览器下载目录，零后端存储占用</span>
+          </div>
+          <div class="setting-control">
+            <span class="setting-hint" style="color: var(--teal); font-weight: 700;">⚡ 浏览器直接下载</span>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-label">
+            <span class="setting-name">默认画质偏好</span>
+            <span class="setting-hint">嗅探及一键快捷下载时的首选质量</span>
+          </div>
+          <div class="setting-control">
+            <select id="selectDefaultQuality" class="setting-select">
+              <option value="best" selected>最高画质 (Best)</option>
+              <option value="compat">标准兼容 (H.264/MP4)</option>
+              <option value="audio">纯音频优先 (MP3/M4A)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-label">
+            <span class="setting-name">YouTube (Cobalt) 画质偏好</span>
+            <span class="setting-hint">通过 Cobalt 开源中继解析时的首选视频分辨率</span>
+          </div>
+          <div class="setting-control">
+            <select id="selectCobaltQuality" class="setting-select">
+              <option value="1080" selected>1080P 全高清 (推荐)</option>
+              <option value="720">720P 高清</option>
+              <option value="480">480P 标清</option>
+              <option value="max">最高原始分辨率 (Max)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-label">
+            <span class="setting-name">自动清理已完成</span>
+            <span class="setting-hint">下载成功后自动从任务列表中移除</span>
+          </div>
+          <div class="setting-control">
+            <label class="switch">
+              <input type="checkbox" id="chkAutoClearDone" />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 存储与管理 -->
+      <div class="card">
+        <div class="card-title">文件存储与路径设置</div>
+        <p class="card-desc">视频与音频直接通过 Chrome 原生下载接口保存至您的本地电脑。</p>
+
+        <div class="setting-item">
+          <div class="setting-label">
+            <span class="setting-name">每次下载询问保存位置 (另存为)</span>
+            <span class="setting-hint">开启后每次弹出系统窗口，可自由选择保存到任意磁盘或路径</span>
+          </div>
+          <div class="setting-control">
+            <label class="switch">
+              <input type="checkbox" id="chkSaveAs" />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="shortcut-actions" style="display:flex; flex-direction:column; gap:8px; margin-top:12px;">
+          <button class="btn btn-outline btn-block" id="btnOpenChromeDownloads">
+            📂 打开浏览器下载中心 (chrome://downloads)
+          </button>
+          <button class="btn btn-outline btn-block" id="btnClearAllTaskHistory" style="color:var(--red); border-color:rgba(248,113,113,0.3)">
+            🗑️ 清空所有任务历史记录
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="app-footer">
+    <span class="footer-hint">OmniVideo v3.0 · 纯前端独立版</span>
+    <span class="footer-server" id="footerServerText">Browser In-Memory Engine</span>
+  </footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>

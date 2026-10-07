@@ -1,0 +1,472 @@
+/* OmniVideo · 网页端内容脚本样式 (v2.1 增强胶囊版) */
+
+/* ================= 1. 播放器悬浮胶囊主容器 ================= */
+.omni-player-capsule {
+  position: absolute !important;
+  top: 14px;
+  right: 14px;
+  bottom: auto !important;
+  left: auto;
+  width: auto !important;
+  height: auto !important;
+  max-width: max-content !important;
+  max-height: max-content !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  z-index: 2147483647 !important;
+  pointer-events: auto !important;
+  isolation: isolate !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  background: rgba(13, 19, 32, 0.9) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(53, 230, 207, 0.65) !important;
+  border-radius: 20px !important;
+  padding: 3px 4px !important;
+  gap: 2px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6) !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 12px !important;
+  color: #eef2f8 !important;
+  user-select: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(-4px) !important;
+  transition: opacity 0.25s ease, transform 0.25s ease, box-shadow 0.2s ease !important;
+}
+.omni-player-capsule.omni-active,
+.omni-player-capsule:hover,
+.omni-player-capsule.is-dragging,
+.omni-player-capsule.open,
+.omni-player-capsule:focus-within {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: translateY(0) !important;
+  box-shadow: 0 6px 24px rgba(53, 230, 207, 0.25) !important;
+}
+.omni-player-capsule.is-dragging {
+  opacity: 0.98 !important;
+  cursor: grabbing !important;
+  box-shadow: 0 8px 30px rgba(53, 230, 207, 0.5) !important;
+  transition: none !important;
+}
+
+/* 胶囊拖拽手柄 */
+.omni-capsule-drag-handle {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 14px !important;
+  height: 24px !important;
+  color: #8b98ab !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
+  cursor: grab !important;
+  user-select: none !important;
+  opacity: 0.65 !important;
+  transition: opacity 0.15s ease, color 0.15s ease !important;
+  margin-left: 2px !important;
+  margin-right: -1px !important;
+}
+.omni-capsule-drag-handle:hover {
+  opacity: 1 !important;
+  color: #35e6cf !important;
+}
+.omni-player-capsule.is-dragging .omni-capsule-drag-handle {
+  cursor: grabbing !important;
+  color: #35e6cf !important;
+}
+
+/* 胶囊内的独立药丸按钮 */
+.omni-capsule-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 5px 10px !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 14px !important;
+  color: #eef2f8 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  line-height: 1 !important;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease !important;
+  white-space: nowrap !important;
+}
+.omni-capsule-btn:hover {
+  background: rgba(53, 230, 207, 0.2) !important;
+  color: #35e6cf !important;
+}
+.omni-capsule-btn.primary {
+  background: #35e6cf !important;
+  color: #06281f !important;
+  font-weight: 700 !important;
+}
+.omni-capsule-btn.primary:hover {
+  background: #4ef0da !important;
+  box-shadow: 0 0 10px rgba(53, 230, 207, 0.4) !important;
+}
+.omni-capsule-btn.omni-sent {
+  background: #10b981 !important;
+  color: #fff !important;
+  pointer-events: none !important;
+}
+
+/* 胶囊分隔线 */
+.omni-capsule-sep {
+  width: 1px !important;
+  height: 14px !important;
+  background: rgba(148, 163, 184, 0.25) !important;
+  margin: 0 1px !important;
+}
+
+/* ================= 2. 胶囊高级功能下拉菜单 ================= */
+.omni-capsule-menu-wrap {
+  position: relative !important;
+  display: inline-flex !important;
+}
+.omni-capsule-dropdown {
+  position: absolute !important;
+  top: calc(100% + 4px) !important;
+  right: 0 !important;
+  z-index: 2147483647 !important;
+  width: 210px !important;
+  background: #0d1320 !important;
+  border: 1px solid rgba(53, 230, 207, 0.5) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7) !important;
+  padding: 6px !important;
+  display: none !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  animation: omni-menu-fade 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+/* 鼠标滑动防丢失隐形桥接层 */
+.omni-capsule-dropdown::before {
+  content: "" !important;
+  position: absolute !important;
+  top: -12px !important;
+  left: -10px !important;
+  right: -10px !important;
+  height: 14px !important;
+  background: transparent !important;
+}
+.omni-capsule-menu-wrap:hover .omni-capsule-dropdown,
+.omni-capsule-dropdown.open {
+  display: flex !important;
+}
+
+.omni-menu-sec-title {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #8b98ab !important;
+  padding: 4px 8px 2px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+.omni-menu-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 6px 10px !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 4px !important;
+  color: #eef2f8 !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  text-align: left !important;
+  width: 100% !important;
+  transition: background 0.15s ease, color 0.15s ease !important;
+}
+.omni-menu-item:hover {
+  background: rgba(53, 230, 207, 0.16) !important;
+  color: #35e6cf !important;
+}
+.omni-menu-item .menu-icon {
+  font-size: 13px !important;
+  width: 16px !important;
+  text-align: center !important;
+}
+
+/* 菜单内倍速快捷条 */
+.omni-speed-row {
+  display: flex !important;
+  gap: 4px !important;
+  padding: 3px 6px !important;
+}
+.omni-speed-chip {
+  flex: 1 !important;
+  padding: 3px 0 !important;
+  text-align: center !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  border-radius: 3px !important;
+  color: #8b98ab !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+.omni-speed-chip:hover {
+  border-color: #35e6cf !important;
+  color: #35e6cf !important;
+}
+.omni-speed-chip.active {
+  background: rgba(53, 230, 207, 0.2) !important;
+  border-color: #35e6cf !important;
+  color: #35e6cf !important;
+}
+
+@keyframes omni-menu-fade {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ================= 3. 网页右侧吸附悬浮胶囊 ================= */
+.omni-side-capsule {
+  position: fixed !important;
+  right: 0 !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 2147483640 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 8px 12px 8px 10px !important;
+  background: #0d1320 !important;
+  border: 1px solid rgba(53, 230, 207, 0.6) !important;
+  border-right: none !important;
+  border-radius: 20px 0 0 20px !important;
+  box-shadow: -4px 6px 24px rgba(0, 0, 0, 0.6) !important;
+  cursor: pointer !important;
+  color: #35e6cf !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  user-select: none !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  opacity: 0.88 !important;
+}
+.omni-side-capsule:hover {
+  opacity: 1 !important;
+  padding-left: 14px !important;
+  box-shadow: -6px 8px 30px rgba(53, 230, 207, 0.3) !important;
+  background: #101725 !important;
+}
+.omni-side-capsule .side-count {
+  background: rgba(53, 230, 207, 0.2) !important;
+  color: #35e6cf !important;
+  font-size: 11px !important;
+  padding: 2px 6px !important;
+  border-radius: 10px !important;
+  font-weight: 800 !important;
+}
+
+/* ================= 4. 视频列表卡片上的下载超级胶囊 ================= */
+.omni-card-capsule {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  bottom: auto !important;
+  left: auto !important;
+  width: auto !important;
+  height: auto !important;
+  max-width: max-content !important;
+  max-height: max-content !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  z-index: 2147483647 !important;
+  isolation: isolate !important;
+  pointer-events: none !important; /* 默认隐藏状态下不阻挡任何鼠标事件，让视频区域 100% 正常响应 hover 自动播放 */
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  padding: 3px 5px !important;
+  background: rgba(10, 14, 22, 0.94) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(53, 230, 207, 0.8) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.75) !important;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease !important;
+  user-select: none !important;
+}
+
+*:hover > .omni-card-capsule,
+.omni-card-capsule:hover,
+.omni-card-capsule.open,
+.bili-video-card:hover .omni-card-capsule,
+.feed-card:hover .omni-card-capsule,
+.video-card:hover .omni-card-capsule,
+ytd-rich-item-renderer:hover .omni-card-capsule,
+ytd-video-renderer:hover .omni-card-capsule,
+ytd-grid-video-renderer:hover .omni-card-capsule,
+ytd-compact-video-renderer:hover .omni-card-capsule,
+ytd-reel-item-renderer:hover .omni-card-capsule,
+ytd-video-preview:hover .omni-card-capsule,
+ytd-thumbnail:hover .omni-card-capsule,
+#inline-preview-player:hover .omni-card-capsule,
+#video-preview:hover .omni-card-capsule,
+[data-omni-attached]:hover .omni-card-capsule,
+[data-omni-card-attached]:hover .omni-card-capsule,
+ytd-video-preview .omni-card-capsule,
+#video-preview .omni-card-capsule,
+#inline-preview-player .omni-card-capsule {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+.omni-card-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  padding: 4px 8px !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 12px !important;
+  color: #eef2f8 !important;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  transition: all 0.15s ease !important;
+}
+.omni-card-btn:hover {
+  background: rgba(53, 230, 207, 0.22) !important;
+  color: #35e6cf !important;
+}
+.omni-card-btn.primary {
+  background: #35e6cf !important;
+  color: #06281f !important;
+}
+.omni-card-btn.primary:hover {
+  background: #4ef0da !important;
+  box-shadow: 0 0 8px rgba(53, 230, 207, 0.5) !important;
+}
+.omni-card-btn.omni-sent {
+  background: #10b981 !important;
+  color: #fff !important;
+  pointer-events: none !important;
+}
+
+/* 卡片胶囊下拉菜单 (Body 传送门 Portal 渲染，免疫一切父级 overflow: hidden 裁剪) */
+.omni-card-menu-wrap {
+  position: relative !important;
+  display: inline-flex !important;
+}
+.omni-card-dropdown {
+  position: fixed !important;
+  z-index: 2147483647 !important;
+  isolation: isolate !important;
+  width: 170px !important;
+  background: #0d1320 !important;
+  border: 1px solid rgba(53, 230, 207, 0.65) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.85) !important;
+  padding: 4px !important;
+  display: none !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  margin: 0 !important;
+}
+.omni-card-dropdown.open {
+  display: flex !important;
+}
+.omni-card-opt {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 6px 8px !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 4px !important;
+  color: #eef2f8 !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  text-align: left !important;
+  width: 100% !important;
+  transition: all 0.12s ease !important;
+}
+.omni-card-opt:hover {
+  background: rgba(53, 230, 207, 0.18) !important;
+  color: #35e6cf !important;
+}
+
+/* ================= 5. 瞬时反馈 Toast ================= */
+.omni-inpage-toast {
+  position: fixed !important;
+  right: 24px !important;
+  bottom: 24px !important;
+  z-index: 2147483647 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  max-width: 380px !important;
+  padding: 12px 18px !important;
+  background: #0d1320 !important;
+  border: 1px solid #35e6cf !important;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+  color: #eef2f8 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif !important;
+  font-size: 13px !important;
+  line-height: 1.4 !important;
+  animation: omni-toast-slide 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  user-select: none !important;
+  pointer-events: none !important;
+}
+.omni-inpage-toast .omni-toast-icon {
+  flex-shrink: 0 !important;
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 50% !important;
+  background: rgba(53, 230, 207, 0.15) !important;
+  color: #35e6cf !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: bold !important;
+  font-size: 14px !important;
+}
+.omni-inpage-toast .omni-toast-body {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+.omni-inpage-toast .omni-toast-title {
+  font-weight: 700 !important;
+  color: #35e6cf !important;
+  margin-bottom: 2px !important;
+}
+.omni-inpage-toast .omni-toast-text {
+  color: #94a3b8 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+@keyframes omni-toast-slide {
+  from { opacity: 0; transform: translateY(16px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ================= 6. 胶囊显示与隐藏全局控制开关 ================= */
+html.omni-hide-side-capsule .omni-side-capsule {
+  display: none !important;
+}
+html.omni-hide-card-capsule .omni-card-capsule,
+html.omni-hide-card-capsule #omni-card-portal-dropdown {
+  display: none !important;
+}
+html.omni-hide-player-capsule .omni-player-capsule {
+  display: none !important;
+}

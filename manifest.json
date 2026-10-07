@@ -1,0 +1,74 @@
+{
+  "manifest_version": 3,
+  "name": "OmniVideo · 纯前端视频下载助手",
+  "version": "3.0.0",
+  "description": "纯前端独立运行的智能视频嗅探与下载助手，无需本地服务，支持 HLS/M3U8 混流、DASH 合流与全网视频高速下载",
+  "permissions": [
+    "storage",
+    "notifications",
+    "contextMenus",
+    "tabs",
+    "alarms",
+    "clipboardRead",
+    "sidePanel",
+    "scripting",
+    "downloads",
+    "downloads.open",
+    "offscreen",
+    "declarativeNetRequest",
+    "webRequest"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "OmniVideo · 打开右侧下载面板",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "side_panel": {
+    "default_path": "popup/popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "core/mse-catcher.js"
+      ],
+      "world": "MAIN",
+      "run_at": "document_start",
+      "all_frames": true
+    },
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

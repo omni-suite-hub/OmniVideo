@@ -1,0 +1,29 @@
+# Agent 工作记忆目录（含项目专属记忆，不应进版本库）
+.workbuddy/
+
+# 操作系统与编辑器产物
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# 依赖与构建产物
+node_modules/
+dist/
+build/
+.next/
+
+# 日志与临时文件
+*.log
+npm-debug.log*
+yarn-error.log*
+*.tmp
+*.bak
+
+# 本地环境变量
+.env
+.env.local
+.env.*.local
+
+# 下载目录（本地调试产物）
+downloads/
